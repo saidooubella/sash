@@ -44,4 +44,4 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-src/main/kotlin/saidooubella/sash/playground/
+src/main/kotlin/io/github/saidooubella/sash/playground/
