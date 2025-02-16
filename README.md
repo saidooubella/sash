@@ -11,8 +11,6 @@ S'ash is a lightweight, embeddable programming language designed with simplicity
 In your `settings.gradle.kts`, add the following to include the JitPack repository:
 
 ```Kotlin
-import java.net.URI
-
 dependencyResolutionManagement {
    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
    repositories {
@@ -23,6 +21,18 @@ dependencyResolutionManagement {
 }
 ```
 
+Or your `settings.gradle`:
+
+```Groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
 #### 2. Add Sash Dependency
 
 In your module-level `build.gradle.kts`, add the Sash dependency:
@@ -30,6 +40,14 @@ In your module-level `build.gradle.kts`, add the Sash dependency:
 ```Kotlin
 dependencies {
   implementation("com.github.saidooubella:sash:LAST-COMMIT-HASH")
+}
+```
+
+Or your module-level `build.gradle`:
+
+```Groovy
+dependencies {
+  implementation "com.github.saidooubella:sash:LAST-COMMIT-HASH"
 }
 ```
 
@@ -144,36 +162,36 @@ In Sash, operations are performed on values of specific types, and certain opera
 
 #### Arithmetic Operations
 
-| **Type** | **Operation** | **Symbol** | **Example** |
-|---|---|---|---|
-| **Integer/Decimal** | Addition | `+` | `5 + 10` |
-| | Subtraction | `-` | `10.9 - 3.43` |
-| | Multiplication | `*` | `4 * 2` |
-| | Division | `/` | `10 / 2` |
-| | Modulo | `%` | `10.0 % 3.0` |
+| **Type**            | **Operation**  | **Symbol** | **Example**   |
+|---------------------|----------------|------------|---------------|
+| **Integer/Decimal** | Addition       | `+`        | `5 + 10`      |
+|                     | Subtraction    | `-`        | `10.9 - 3.43` |
+|                     | Multiplication | `*`        | `4 * 2`       |
+|                     | Division       | `/`        | `10 / 2`      |
+|                     | Modulo         | `%`        | `10.0 % 3.0`  |
 
 #### Comparison Operations
 
-| **Type** | **Operation** | **Symbol** | **Example** |
-|---|---|---|---|
-| **Integer/Decimal** | Equality | `==` | `5 == 5` |
-| | Inequality | `!=` | `5 != 6` |
-| | Greater Than | `>` | `10 > 5` |
-| | Less Than | `<` | `5 < 10` |
-| | Greater Than or Equal To | `>=` | `10 >= 5` |
-| | Less Than or Equal To | `<=` | `5 <= 10` |
-| **Any Type** | Equality | `==` | `"apple" == "apple"` |
-| | Inequality | `!=` | `"apple" != "banana"` |
+| **Type**            | **Operation**            | **Symbol** | **Example**           |
+|---------------------|--------------------------|------------|-----------------------|
+| **Integer/Decimal** | Equality                 | `==`       | `5 == 5`              |
+|                     | Inequality               | `!=`       | `5 != 6`              |
+|                     | Greater Than             | `>`        | `10 > 5`              |
+|                     | Less Than                | `<`        | `5 < 10`              |
+|                     | Greater Than or Equal To | `>=`       | `10 >= 5`             |
+|                     | Less Than or Equal To    | `<=`       | `5 <= 10`             |
+| **Any Type**        | Equality                 | `==`       | `"apple" == "apple"`  |
+|                     | Inequality               | `!=`       | `"apple" != "banana"` |
 
 #### Logical Operations
 
-| **Type** | **Operation** | **Symbol** | **Example** |
-|---|---|---|---|
-| **Boolean** | Logical AND | `&&` | `true && false` |
-| | Logical OR | `\|\|` | `true \|\| false` |
-| | Logical NOT | `!` | `!true` |
+| **Type**    | **Operation** | **Symbol** | **Example**       |
+|-------------|---------------|------------|-------------------|
+| **Boolean** | Logical AND   | `&&`       | `true && false`   |
+|             | Logical OR    | `\|\|`     | `true \|\| false` |
+|             | Logical NOT   | `!`        | `!true`           |
 
-### Control Flow Control flow
+### Control Flow
 
 statements allow you to dictate the flow of execution in your Sash program. Below are the primary control flow structures.
 
@@ -434,7 +452,7 @@ This tells the compiler to evaluate the expression but ignore its result.
 ### Notation
 
 | Symbol         | Description                                 |
-| -------------- | ------------------------------------------- |
+|----------------|---------------------------------------------|
 | `( .. )`       | Group – Groups elements together            |
 | `? .. ?`       | Description – Provides additional info      |
 | `'..'`         | Terminal – Fixed symbol                     |
@@ -476,7 +494,7 @@ yield                = expression
 ```
 
 ```
-definition           = 'def' 'mut' identifier type-params? type-annotation? '=' initializer ';'
+definition           = 'def' 'mut'? identifier type-params? type-annotation? '=' initializer ';'
                      ;
 ```
 

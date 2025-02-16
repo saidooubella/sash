@@ -32,7 +32,7 @@ unit                 = expression ';'
 yield                = expression
                      ;
 
-definition           = 'def' 'mut' identifier type-params? type-annotation? '=' initializer ';'
+definition           = 'def' 'mut'? identifier type-params? type-annotation? '=' initializer ';'
                      ;
 
 initializer          = record ( '{' fields '}' )?
