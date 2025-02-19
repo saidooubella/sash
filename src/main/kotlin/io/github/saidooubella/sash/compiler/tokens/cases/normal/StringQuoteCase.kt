@@ -15,6 +15,7 @@ internal object StringQuoteCase : TokenCase {
         return if (input.matches('"')) build(context, input) else null
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
         context.enterMode(TokenizerMode.String)
         return input.consumeCharToken(context, TokenType.DoubleQuote)

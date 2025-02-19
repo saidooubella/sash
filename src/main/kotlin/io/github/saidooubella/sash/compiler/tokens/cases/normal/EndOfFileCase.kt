@@ -12,6 +12,7 @@ internal object EndOfFileCase : TokenCase {
         return if (input.isDone) build(context) else null
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext): RawToken {
         val position = context.positionBuilder.build()
         return RawToken("end of file", TokenType.EndOfFile, position, position)

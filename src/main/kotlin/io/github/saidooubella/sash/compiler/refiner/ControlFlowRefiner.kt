@@ -16,7 +16,7 @@ internal fun refineControlFlowCondition(context: RefinerContext, condition: RawE
 
     @Suppress("NAME_SHADOWING")
     val condition = context.withContextualType(BooleanType) {
-        refineExpression(context, condition, ExpressionMode.Standalone)
+        refineExpression(context, condition, ExpressionMode.NotCallable)
     }
 
     if (!condition.type.assignableTo(BooleanType)) {

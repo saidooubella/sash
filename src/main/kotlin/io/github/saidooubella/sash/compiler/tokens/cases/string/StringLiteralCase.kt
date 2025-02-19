@@ -12,6 +12,7 @@ import io.github.saidooubella.sash.compiler.tokens.utils.consume
 import io.github.saidooubella.sash.compiler.tokens.utils.matches
 import io.github.saidooubella.sash.compiler.tokens.utils.matchesNewLine
 import io.github.saidooubella.sash.compiler.tokens.utils.notMatchesNewLine
+import io.github.saidooubella.sash.compiler.utils.fastRepeatAll
 
 internal object StringLiteralCase : TokenCase {
 
@@ -19,6 +20,7 @@ internal object StringLiteralCase : TokenCase {
         return if (notMatchesEarlyEnd(input)) build(context, input) else quiteStringMode(context)
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
 
         val start = context.positionBuilder.build()
@@ -49,6 +51,7 @@ internal object StringLiteralCase : TokenCase {
         return RawToken(context.builder.consume(), TokenType.StringLiteral, start, end)
     }
 
+    @JvmStatic
     private fun quiteStringMode(context: TokenizerContext): Nothing? {
         context.exitMode()
         return null
@@ -63,6 +66,7 @@ internal object StringLiteralCase : TokenCase {
         put('"'.code, '"')
     }
 
+    @JvmStatic
     private fun handleEscaping(input: MutableIntInput, context: TokenizerContext) {
         if (input.isDone) {
             val position = context.positionBuilder.build()
@@ -84,6 +88,7 @@ internal object StringLiteralCase : TokenCase {
         }
     }
 
+    @JvmStatic
     private fun concatCodepoint(input: MutableIntInput): Int {
         val u1 = Character.digit(input.consume(), 16)
         val u2 = Character.digit(input.consume(), 16)
@@ -92,20 +97,24 @@ internal object StringLiteralCase : TokenCase {
         return (u1 shl 12) or (u2 shl 8) or (u3 shl 4) or u4
     }
 
+    @JvmStatic
     private fun matchesUnicodeLiteral(input: MutableIntInput): Boolean {
-        return 0.rangeUntil(4).all { isHexDigit(input.peek(it)) }
+        return fastRepeatAll(4) { isHexDigit(input.peek(it)) }
     }
 
+    @JvmStatic
     private fun isHexDigit(codepoint: Int): Boolean {
         return codepoint in '0'.code..'9'.code
                 || codepoint in 'A'.code..'Z'.code
                 || codepoint in 'a'.code..'z'.code
     }
 
+    @JvmStatic
     private fun matchesInvalidPart(input: MutableIntInput): Boolean {
         return input.matchesNewLine() || input.matches('"')
     }
 
+    @JvmStatic
     private fun notMatchesEarlyEnd(input: MutableIntInput): Boolean {
         return input.isNotDone && input.notMatchesNewLine()
     }

@@ -16,6 +16,7 @@ internal object NumberCase : TokenCase {
         return if (input.current.isLatinDigit()) build(context, input) else null
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
         val start = context.positionBuilder.build()
         input.collectWhile(context.builder) { it.isLatinDigit() }
@@ -30,5 +31,6 @@ internal object NumberCase : TokenCase {
         }
     }
 
+    @JvmStatic
     private fun Int.isLatinDigit(): Boolean = this in '0'.code..'9'.code
 }

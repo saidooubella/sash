@@ -23,7 +23,7 @@ internal fun refineStatement(context: RefinerContext, statement: RawStatement): 
 
 private fun refineDropStatement(context: RefinerContext, statement: DropStatement): Statement {
 
-    val expression = refineExpression(context, statement.expression, ExpressionMode.Standalone)
+    val expression = refineExpression(context, statement.expression, ExpressionMode.NotCallable)
 
     if (expression.type != ErrorType && expression.type.assignableTo(UnitType)) {
         context.reporter.reportUnitDiscard(expression.start, expression.end)
@@ -39,7 +39,7 @@ private fun refineEmptyStatement(statement: EmptyRawStatement): Statement {
 private fun refineExpressionStatement(context: RefinerContext, statement: ExpressionRawStatement): Statement {
 
     val expression = context.withContextualType(null) {
-        refineExpression(context, statement.expression, ExpressionMode.Statement + ExpressionMode.Standalone)
+        refineExpression(context, statement.expression, ExpressionMode.Statement + ExpressionMode.NotCallable)
     }
 
     if (expression !is AssignmentExpression && !expression.type.assignableTo(UnitType)) {
@@ -71,7 +71,7 @@ private fun refineReturnStatement(context: RefinerContext, statement: ReturnRawS
     val functionScope = context.currentScope<FunctionScope>()
 
     val value = context.withContextualType(functionScope?.returnType) {
-        statement.expression?.let { refineExpression(context, it, ExpressionMode.Standalone) }
+        statement.expression?.let { refineExpression(context, it, ExpressionMode.NotCallable) }
     }
 
     val ret = statement.returnKeyword
@@ -102,7 +102,7 @@ private fun refineImplicitResultStatement(context: RefinerContext, statement: Im
         is LoopScope -> implicitExpressionStatement(context, statement)
         is IfScope -> implicitYieldStatement(context, statement, scope)
         null -> {
-            refineExpression(context, statement.expression, ExpressionMode.Standalone)
+            refineExpression(context, statement.expression, ExpressionMode.NotCallable)
             context.reporter.reportInvalidImplicitResultUsage(statement.start, statement.end)
             ErrorStatement(statement)
         }
@@ -112,7 +112,7 @@ private fun refineImplicitResultStatement(context: RefinerContext, statement: Im
 private fun implicitExpressionStatement(context: RefinerContext, statement: ImplicitResultRawStatement): ExpressionStatement {
 
     val value = context.withContextualType(null) {
-        refineExpression(context, statement.expression, ExpressionMode.Standalone)
+        refineExpression(context, statement.expression, ExpressionMode.NotCallable)
     }
 
     if (!value.type.assignableTo(UnitType)) {
@@ -127,7 +127,7 @@ private fun implicitYieldStatement(context: RefinerContext, statement: ImplicitR
     val yieldedType = scope.yieldedType
 
     val value = context.withContextualType(yieldedType) {
-        refineExpression(context, statement.expression, ExpressionMode.Standalone)
+        refineExpression(context, statement.expression, ExpressionMode.NotCallable)
     }
 
     if (yieldedType == null) {
@@ -146,7 +146,7 @@ private fun implicitReturnStatement(context: RefinerContext, statement: Implicit
     val returnType = scope.returnType
 
     val value = context.withContextualType(returnType) {
-        refineExpression(context, statement.expression, ExpressionMode.Standalone)
+        refineExpression(context, statement.expression, ExpressionMode.NotCallable)
     }
 
     if (returnType == null) {
@@ -231,7 +231,7 @@ private fun simpleDefinitionStatement(context: RefinerContext, statement: Defini
     context.scoped {
         typeParams.forEach(context::putType)
         annotatedType = statement.typeAnnotation?.type?.let { withTypeParams(refineType(context, it), typeParams) }
-        value = context.withContextualType(annotatedType) { refineExpression(context, initializer, ExpressionMode.Standalone) }
+        value = context.withContextualType(annotatedType) { refineExpression(context, initializer, ExpressionMode.NotCallable) }
     }
 
     if (statement.typeParams != null && statement.mutKeyword != null) {

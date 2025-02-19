@@ -17,6 +17,7 @@ internal object BlockCommentCase : TokenCase {
         return if (input.matches("/*")) build(context, input) else null
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
 
         var level = 0
@@ -33,6 +34,7 @@ internal object BlockCommentCase : TokenCase {
         return RawToken(context.builder.consume(), MetaTokenType.BlockComment, start, end)
     }
 
+    @JvmStatic
     private fun handleCommentsNesting(input: MutableIntInput, context: TokenizerContext): Int {
         return when {
             input.matches("/*") -> input.collect(context.builder, 2).let { 1 }

@@ -16,6 +16,7 @@ internal object LineBreakCase : TokenCase {
         return if (input.matchesNewLine()) build(context, input) else null
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
         val start = context.positionBuilder.build()
         val length = if (input.matches("\r\n")) 2 else 1

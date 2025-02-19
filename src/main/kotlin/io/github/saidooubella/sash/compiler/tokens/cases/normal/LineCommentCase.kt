@@ -16,6 +16,7 @@ internal object LineCommentCase : TokenCase {
         return if (input.matches("//")) build(context, input) else null
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
         val start = context.positionBuilder.build()
         input.collectWhile(context.builder) { input.notMatchesNewLine() }

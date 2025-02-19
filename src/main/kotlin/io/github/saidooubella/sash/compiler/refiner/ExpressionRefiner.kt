@@ -12,7 +12,7 @@ import io.github.saidooubella.sash.compiler.utils.*
 import kotlin.math.min
 
 @JvmInline
-internal value class ExpressionMode(private val value: Int) {
+internal value class ExpressionMode private constructor(private val value: Int) {
 
     operator fun plus(mode: ExpressionMode) = ExpressionMode(this.value or mode.value)
     operator fun get(mode: ExpressionMode) = this.value and mode.value != 0
@@ -20,7 +20,7 @@ internal value class ExpressionMode(private val value: Int) {
     companion object {
         val None = ExpressionMode(0)
         val Statement = ExpressionMode(1)
-        val Standalone = ExpressionMode(2)
+        val NotCallable = ExpressionMode(2)
     }
 }
 
@@ -59,12 +59,12 @@ private fun refineIfExpression(context: RefinerContext, expression: IfRawExpress
 
     val scope = IfScope(if (isExpression) context.currentContextualType<Type>() else UnitType)
 
-    context.scoped(scope) {
+    return context.scoped(scope) {
         val ifBody = validateBlockResult(context, scope, expression.body)
         val elseIfClauses = expression.elseIfClauses.map { refineElseIfClause(context, scope, it) }
         val elseBody = expression.elseClause?.body?.let { validateBlockResult(context, scope, it) }
         val type = scope.yieldedType ?: UnitType
-        return IfExpression(condition, ifBody, elseIfClauses, elseBody, type, expression.start, expression.end)
+        IfExpression(condition, ifBody, elseIfClauses, elseBody, type, expression.start, expression.end)
     }
 }
 
@@ -88,14 +88,14 @@ private fun validateBlockResult(context: RefinerContext, scope: IfScope, block: 
 }
 
 private fun refineParenthesizedExpression(context: RefinerContext, expression: ParenthesizedRawExpression): Expression {
-    val inner = refineExpression(context, expression.expression, ExpressionMode.Standalone)
+    val inner = refineExpression(context, expression.expression, ExpressionMode.NotCallable)
     return ParenthesizedExpression(inner)
 }
 
 private fun refineAssignmentExpression(context: RefinerContext, expression: AssignmentRawExpression): Expression {
 
-    val target = context.withContextualType(null) { refineExpression(context, expression.target, ExpressionMode.Standalone) }
-    val value = context.withContextualType(target.type) { refineExpression(context, expression.value, ExpressionMode.Standalone) }
+    val target = context.withContextualType(null) { refineExpression(context, expression.target, ExpressionMode.NotCallable) }
+    val value = context.withContextualType(target.type) { refineExpression(context, expression.value, ExpressionMode.NotCallable) }
 
     if (target.type == ErrorType) return ErrorExpression(expression)
 
@@ -243,7 +243,7 @@ private fun processArguments(
         is SimpleRawArgs -> {
             args.valueArgs.forEachIndexed { index, expression ->
                 context.withContextualType(finalType.valueParams.getOrNull(index)) {
-                    handleRefinedArg(refineExpression(context, expression, ExpressionMode.Standalone))
+                    handleRefinedArg(refineExpression(context, expression, ExpressionMode.NotCallable))
                 }
             }
         }
@@ -252,7 +252,7 @@ private fun processArguments(
             val values = args.args?.valueArgs.orEmpty()
             values.forEachIndexed { index, expression ->
                 context.withContextualType(finalType.valueParams.getOrNull(index)) {
-                    handleRefinedArg(refineExpression(context, expression, ExpressionMode.Standalone))
+                    handleRefinedArg(refineExpression(context, expression, ExpressionMode.NotCallable))
                 }
             }
             context.withContextualType(finalType.valueParams.getOrNull(values.elementsSize)) {
@@ -262,7 +262,7 @@ private fun processArguments(
     }
 
     if (refinedArgs.isEmpty()) {
-        extractContextualTypes(inferredTypes, contextualReturn, finalType, refinedArgs.map { it.type })
+        extractContextualTypes(inferredTypes, contextualReturn, finalType, emptyList())
         finalType = finalType.substitute(inferredTypes)
     }
 
@@ -273,12 +273,12 @@ private fun processArguments(context: RefinerContext, args: ValueRawArgs) {
     context.withContextualType(null) {
         when (args) {
             is SimpleRawArgs -> {
-                args.valueArgs.forEach { refineExpression(context, it, ExpressionMode.Standalone) }
+                args.valueArgs.forEach { refineExpression(context, it, ExpressionMode.NotCallable) }
             }
 
             is TailFunctionRawArgs -> {
                 val values = args.args?.valueArgs.orEmpty()
-                values.forEach { refineExpression(context, it, ExpressionMode.Standalone) }
+                values.forEach { refineExpression(context, it, ExpressionMode.NotCallable) }
                 refineFunctionExpression(context, args.trailingFn)
             }
         }
@@ -368,17 +368,19 @@ private fun refineIdentifierExpression(context: RefinerContext, expression: Iden
         return ErrorExpression(expression)
     }
 
-    return if (expressionMode[ExpressionMode.Standalone] && symbol.type is FunctionType && symbol.type.typeParams.isNotEmpty()) {
+    val type = symbol.type
+
+    return if (expressionMode[ExpressionMode.NotCallable] && type is FunctionType && type.typeParams.isNotEmpty()) {
         context.reporter.reportStandaloneGenericType(expression.start, expression.end, expression.identifier.text)
         ErrorExpression(expression)
     } else {
-        IdentifierExpression(symbol, symbol.type, expression.start, expression.end)
+        IdentifierExpression(symbol, type, expression.start, expression.end)
     }
 }
 
 private fun refineUnaryExpression(context: RefinerContext, expression: UnaryRawExpression): Expression {
 
-    val operand = context.withContextualType(null) { refineExpression(context, expression.operand, ExpressionMode.Standalone) }
+    val operand = context.withContextualType(null) { refineExpression(context, expression.operand, ExpressionMode.NotCallable) }
 
     if (operand.type == ErrorType) return ErrorExpression(expression)
 
@@ -395,8 +397,8 @@ private fun refineUnaryExpression(context: RefinerContext, expression: UnaryRawE
 
 private fun refineLogicalBinaryExpression(context: RefinerContext, expression: LogicalBinaryRawExpression): Expression {
 
-    val left = context.withContextualType(null) { refineExpression(context, expression.left, ExpressionMode.Standalone) }
-    val right = context.withContextualType(null) { refineExpression(context, expression.right, ExpressionMode.Standalone) }
+    val left = context.withContextualType(null) { refineExpression(context, expression.left, ExpressionMode.NotCallable) }
+    val right = context.withContextualType(null) { refineExpression(context, expression.right, ExpressionMode.NotCallable) }
 
     if (right.type == ErrorType || left.type == ErrorType) return ErrorExpression(expression)
 
@@ -413,8 +415,8 @@ private fun refineLogicalBinaryExpression(context: RefinerContext, expression: L
 
 private fun refineBinaryExpression(context: RefinerContext, expression: BinaryRawExpression): Expression {
 
-    val left = context.withContextualType(null) { refineExpression(context, expression.left, ExpressionMode.Standalone) }
-    val right = context.withContextualType(null) { refineExpression(context, expression.right, ExpressionMode.Standalone) }
+    val left = context.withContextualType(null) { refineExpression(context, expression.left, ExpressionMode.NotCallable) }
+    val right = context.withContextualType(null) { refineExpression(context, expression.right, ExpressionMode.NotCallable) }
 
     if (right.type == ErrorType || left.type == ErrorType) return ErrorExpression(expression)
 

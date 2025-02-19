@@ -15,6 +15,7 @@ internal object WhitespaceCase : TokenCase {
         return if (input.matchesWhitespace()) build(context, input) else null
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
         val start = context.positionBuilder.build()
         input.collectWhile(context.builder) { input.matchesWhitespace() }

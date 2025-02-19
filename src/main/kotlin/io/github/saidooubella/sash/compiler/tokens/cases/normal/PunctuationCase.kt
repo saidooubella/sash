@@ -16,6 +16,7 @@ internal object PunctuationCase : TokenCase {
         return punctuations.firstOrNull { input.matches(it.text) }?.let { build(context, input, it) }
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput, punctuation: Punctuation): RawToken {
         val start = context.positionBuilder.build()
         input.collect(context.builder, punctuation.text.length)
@@ -23,7 +24,7 @@ internal object PunctuationCase : TokenCase {
         return RawToken(context.builder.consume(), punctuation.type, start, end)
     }
 
-    private data class Punctuation(val text: String, val type: RawTokenType)
+    private class Punctuation(val text: String, val type: RawTokenType)
 
     private val punctuations = buildList {
         // Two characters punctuation

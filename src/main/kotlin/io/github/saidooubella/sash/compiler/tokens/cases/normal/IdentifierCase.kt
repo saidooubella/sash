@@ -16,6 +16,7 @@ internal object IdentifierCase : TokenCase {
         return if (input.matchesIdentifierStartChar()) build(context, input) else null
     }
 
+    @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
         val start = context.positionBuilder.build()
         input.collectWhile(context.builder) { input.matchesIdentifierChar() }
@@ -40,12 +41,15 @@ internal object IdentifierCase : TokenCase {
         put("_", TokenType.Underscore)
     }
 
+    @JvmStatic
     private fun tokenType(identifier: String) = keywords[identifier] ?: TokenType.Identifier
 
+    @JvmStatic
     private fun IntInput.matchesIdentifierStartChar(): Boolean {
         return matches('_') || Character.isLetter(current)
     }
 
+    @JvmStatic
     private fun IntInput.matchesIdentifierChar(): Boolean {
         return matchesIdentifierStartChar() || Character.isDigit(current)
     }
