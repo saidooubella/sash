@@ -13,16 +13,16 @@ import io.github.saidooubella.sash.compiler.tokens.utils.matches
 internal object NumberCase : TokenCase {
 
     override fun tryTokenize(context: TokenizerContext, input: MutableIntInput): RawToken? {
-        return if (input.current.isLatinDigit()) build(context, input) else null
+        return if (input.current.isDigit()) build(context, input) else null
     }
 
     @JvmStatic
     private fun build(context: TokenizerContext, input: MutableIntInput): RawToken {
         val start = context.positionBuilder.build()
-        input.collectWhile(context.builder) { it.isLatinDigit() }
-        return if (input.matches('.') && input.peek(1).isLatinDigit()) {
+        input.collectWhile(context.builder) { it.isDigit() }
+        return if (input.matches('.') && input.peek(1).isDigit()) {
             context.builder.appendCodePoint(input.consume())
-            input.collectWhile(context.builder) { it.isLatinDigit() }
+            input.collectWhile(context.builder) { it.isDigit() }
             val end = context.positionBuilder.build()
             RawToken(context.builder.consume(), TokenType.DecimalLiteral, start, end)
         } else {
@@ -32,5 +32,5 @@ internal object NumberCase : TokenCase {
     }
 
     @JvmStatic
-    private fun Int.isLatinDigit(): Boolean = this in '0'.code..'9'.code
+    private fun Int.isDigit(): Boolean = this in '0'.code..'9'.code
 }

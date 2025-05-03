@@ -10,6 +10,7 @@ import io.github.saidooubella.sash.compiler.tokens.Token
 import io.github.saidooubella.sash.compiler.tokens.TokenType
 import io.github.saidooubella.sash.compiler.utils.DelimitedList
 import io.github.saidooubella.sash.compiler.utils.buildDelimitedList
+import io.github.saidooubella.sash.compiler.utils.emptyDelimitedList
 
 internal fun expression(context: ParserContext, input: MutableInput<Token>, basic: Boolean): RawExpression {
     return assignment(context, input, basic)
@@ -283,11 +284,13 @@ private fun functionParamList(input: MutableInput<Token>, context: ParserContext
         return RawParameter(identifier, type)
     }
 
+    if (input.current.type == TokenType.Arrow) input.current.run {
+        context.reporter.reportUnexpectedToken(start, end, "a function parameter", null)
+        return emptyDelimitedList()
+    }
+
     return buildDelimitedList {
-        if (input.current.type == TokenType.Arrow) return@buildDelimitedList input.current.run {
-            context.reporter.reportUnexpectedToken(start, end, "a function parameter", null)
-        }
-        input.consumeWhile(context, { hasMoreParams() }) {
+        input.consumeWhile(context, ::hasMoreParams) {
             addElement(parameter())
             if (hasMoreParams()) {
                 addDelimiter(input.consumeToken(context, TokenType.Comma, ","))
@@ -301,7 +304,7 @@ private fun stringRawExpression(context: ParserContext, input: MutableInput<Toke
     val value = input.consumeTokenOrNull(context, TokenType.StringLiteral)
     val end = value?.end ?: quote.end
 
-    if (input.current.type == TokenType.DoubleQuote && end aligns input.current.start) {
+    if (input.current.type == TokenType.DoubleQuote && input.current.start aligns end) {
         return StringRawExpression(quote, value, input.consume())
     }
 
