@@ -22,6 +22,14 @@ public inline fun <T, R : Any> List<T>.fastFirstNotNullOf(transform: (T) -> R?):
         ?: throw NoSuchElementException("No element of the collection was transformed to a non-null value.")
 }
 
+public inline fun <T> List<T>.fastFirstOrNull(predicate: (T) -> Boolean): T? {
+    for (index in indices) {
+        val element = this[index]
+        if (predicate(element)) return element
+    }
+    return null
+}
+
 public inline fun <T, R : Any> List<T>.fastFirstNotNullOfOrNull(transform: (T) -> R?): R? {
     for (index in indices) {
         val result = transform(this[index])

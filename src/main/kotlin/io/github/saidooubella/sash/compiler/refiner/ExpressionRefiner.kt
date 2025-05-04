@@ -313,7 +313,7 @@ private fun refineFunctionExpression(context: RefinerContext, expression: Functi
 private fun refineFunctionParams(
     context: RefinerContext,
     openBrace: Token,
-    rawParams: FunctionRawParams?,
+    rawParams: FunctionRawSignature?,
     contextualParams: List<Type>?,
 ): List<Parameter> {
     val params = rawParams?.params.orEmpty()

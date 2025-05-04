@@ -31,11 +31,12 @@ internal object PunctuationCase : TokenCase {
         add(Punctuation("&&", TokenType.AmpersandAmpersand))
         add(Punctuation(">=", TokenType.GreaterThanEqual))
         add(Punctuation("<=", TokenType.LessThanEqual))
+        add(Punctuation("::", TokenType.ColonColon))
         add(Punctuation("==", TokenType.EqualEqual))
         add(Punctuation("!=", TokenType.BangEqual))
         add(Punctuation("||", TokenType.PipePipe))
         add(Punctuation("->", TokenType.Arrow))
-        // One character punctuation
+        // One-character punctuation
         add(Punctuation("]", TokenType.CloseBracket))
         add(Punctuation("[", TokenType.OpenBracket))
         add(Punctuation(">", TokenType.GreaterThan))

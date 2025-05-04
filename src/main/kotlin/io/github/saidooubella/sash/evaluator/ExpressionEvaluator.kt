@@ -1,6 +1,7 @@
 package io.github.saidooubella.sash.evaluator
 
 import io.github.saidooubella.sash.compiler.refiner.nodes.*
+import io.github.saidooubella.sash.compiler.utils.fastFirstOrNull
 import io.github.saidooubella.sash.compiler.utils.fastForEach
 import io.github.saidooubella.sash.compiler.utils.fastMap
 import io.github.saidooubella.sash.evaluator.control.ControlException
@@ -38,7 +39,9 @@ private fun evalIfExpression(env: Environment, expression: IfExpression): AnyVal
         if (evalCondition(expression.condition)) {
             expression.ifBody.fastForEach { evalStatement(env, it) }
         } else {
-            val body = expression.elseIfClauses.firstOrNull { evalCondition(it.condition) }?.body ?: expression.elseBody
+            val body = expression.elseIfClauses
+                .fastFirstOrNull { evalCondition(it.condition) }?.body
+                ?: expression.elseBody
             body?.fastForEach { evalStatement(env, it) }
         }
         UnitValue
@@ -143,10 +146,14 @@ private fun evalBinaryExpression(env: Environment, expression: BinaryExpression)
 }
 
 private fun evalLogicalBinaryExpression(env: Environment, expression: LogicalBinaryExpression): AnyValue {
-    val left = checkInstance<BooleanValue>(evalExpression(env, expression.left))
+    fun evalBoolean(expression: Expression): BooleanValue {
+        return checkInstance<BooleanValue>(evalExpression(env, expression))
+    }
+
+    val left = evalBoolean(expression.left)
     return when (expression.operator) {
-        LogicalBinaryOperator.Conjunction -> if (!left.value) left else checkInstance<BooleanValue>(evalExpression(env, expression.right))
-        LogicalBinaryOperator.Disjunction -> if (left.value) left else checkInstance<BooleanValue>(evalExpression(env, expression.right))
+        LogicalBinaryOperator.Conjunction -> if (!left.value) left else evalBoolean(expression.right)
+        LogicalBinaryOperator.Disjunction -> if (left.value) left else evalBoolean(expression.right)
     }
 }
 

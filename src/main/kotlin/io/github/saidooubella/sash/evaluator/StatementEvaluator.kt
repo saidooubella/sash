@@ -1,6 +1,7 @@
 package io.github.saidooubella.sash.evaluator
 
 import io.github.saidooubella.sash.compiler.refiner.nodes.*
+import io.github.saidooubella.sash.compiler.utils.fastForEach
 import io.github.saidooubella.sash.compiler.utils.fastZipToMutableMap
 import io.github.saidooubella.sash.evaluator.control.ControlException
 import io.github.saidooubella.sash.evaluator.utils.checkInstance
@@ -40,7 +41,7 @@ private fun evalYieldStatement(env: Environment, statement: YieldStatement) {
 private fun evalWhileStatement(env: Environment, statement: WhileStatement) {
     while (checkInstance<BooleanValue>(evalExpression(env, statement.condition)).value) {
         try {
-            statement.body.forEach { evalStatement(env, it) }
+            statement.body.fastForEach { evalStatement(env, it) }
         } catch (_: ControlException.Continue) {
             continue
         } catch (_: ControlException.Break) {

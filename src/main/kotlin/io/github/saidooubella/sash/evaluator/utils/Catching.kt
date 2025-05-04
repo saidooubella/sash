@@ -1,10 +1,10 @@
 package io.github.saidooubella.sash.evaluator.utils
 
-internal inline fun <reified T : Exception, R> catching(transform: (T) -> R, block: () -> R): R {
+internal inline fun <reified E : Exception, R> catching(transform: (E) -> R, block: () -> R): R {
     return try {
         block()
     } catch (e: Exception) {
-        if (e !is T) throw e
+        if (e !is E) throw e
         transform(e)
     }
 }

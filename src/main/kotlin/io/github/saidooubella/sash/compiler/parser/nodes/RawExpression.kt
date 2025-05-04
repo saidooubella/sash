@@ -128,7 +128,7 @@ public data class BooleanRawExpression internal constructor(
 
 public data class FunctionRawExpression internal constructor(
     val openBrace: Token,
-    val params: FunctionRawParams?,
+    val params: FunctionRawSignature?,
     val statements: List<RawStatement>,
     val closeBrace: Token,
 ) : RawExpression {
@@ -136,10 +136,19 @@ public data class FunctionRawExpression internal constructor(
     override val end: Position get() = closeBrace.end
 }
 
-public data class FunctionRawParams internal constructor(
+public data class FunctionRawSignature internal constructor(
     val params: DelimitedList<RawParameter, Token>,
+    val returnType: FunctionRawReturnType?,
     val arrow: Token,
 )
+
+public data class FunctionRawReturnType internal constructor(
+    val colonColon: Token,
+    val type: RawType,
+) : Spanned {
+    override val start: Position get() = colonColon.start
+    override val end: Position get() = type.end
+}
 
 public data class RawParameter internal constructor(
     val identifier: Token,

@@ -91,7 +91,11 @@ private fun multiplicative(context: ParserContext, input: MutableInput<Token>, b
 
 private fun prefix(context: ParserContext, input: MutableInput<Token>, basic: Boolean): RawExpression {
     return when (input.current.type) {
-        TokenType.Bang, TokenType.Plus, TokenType.Minus -> UnaryRawExpression(input.consume(), prefix(context, input, basic))
+        TokenType.Bang, TokenType.Plus, TokenType.Minus -> UnaryRawExpression(
+            input.consume(),
+            prefix(context, input, basic)
+        )
+
         else -> postfix(context, input, basic)
     }
 }
@@ -104,7 +108,7 @@ private fun postfix(context: ParserContext, input: MutableInput<Token>, basic: B
 
         if (input.current.type == TokenType.Dot) {
             val dot = input.consume()
-            val identifier = input.consumeToken(context, TokenType.Identifier, "field name")
+            val identifier = input.consumeToken(context, TokenType.Identifier, "a member name")
             left = AccessRawExpression(left, dot, identifier)
             continue
         }
@@ -230,7 +234,11 @@ private fun elseRawClause(input: MutableInput<Token>, context: ParserContext): E
     return ElseRawClause(elseKeyword, controlBody(context, input))
 }
 
-private fun parenthesisedRawExpression(context: ParserContext, input: MutableInput<Token>, basic: Boolean): RawExpression {
+private fun parenthesisedRawExpression(
+    context: ParserContext,
+    input: MutableInput<Token>,
+    basic: Boolean,
+): RawExpression {
     val openParent = input.consume()
     val expression = expression(context, input, basic)
     val closeParent = input.consumeToken(context, TokenType.CloseParent, ")")
@@ -256,10 +264,11 @@ private fun functionRawExpression(context: ParserContext, input: MutableInput<To
     return FunctionRawExpression(openBrace, params, statements, closeBrace)
 }
 
-private fun functionParams(input: MutableInput<Token>, context: ParserContext): FunctionRawParams? {
+private fun functionParams(input: MutableInput<Token>, context: ParserContext): FunctionRawSignature? {
     input.mark(context)
 
-    val paramsList = functionParamList(input, context)
+    val params = functionParamList(input, context)
+    val returnType = returnTypeOrNull(input, context)
     val arrow = input.consumeTokenOrNull(context, TokenType.Arrow)
 
     if (arrow == null) {
@@ -268,12 +277,13 @@ private fun functionParams(input: MutableInput<Token>, context: ParserContext): 
     }
 
     input.done(context)
-    return FunctionRawParams(paramsList, arrow)
+    return FunctionRawSignature(params, returnType, arrow)
 }
 
 private fun functionParamList(input: MutableInput<Token>, context: ParserContext): DelimitedList<RawParameter, Token> {
     fun hasMoreParams(): Boolean {
         return input.current.type != TokenType.Arrow
+                && input.current.type != TokenType.ColonColon
                 && input.current.type != TokenType.OpenBrace
                 && input.current.type != TokenType.CloseBrace
     }
@@ -297,6 +307,11 @@ private fun functionParamList(input: MutableInput<Token>, context: ParserContext
             }
         }
     }
+}
+
+private fun returnTypeOrNull(input: MutableInput<Token>, context: ParserContext): FunctionRawReturnType? {
+    val colonColon = input.consumeTokenOrNull(context, TokenType.ColonColon) ?: return null
+    return FunctionRawReturnType(colonColon, type(context, input))
 }
 
 private fun stringRawExpression(context: ParserContext, input: MutableInput<Token>): StringRawExpression {

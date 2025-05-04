@@ -133,10 +133,13 @@ string-part          = ~( '"' | '\r\n' | '\r' | '\n' )
                      | '\u' hex-digit hex-digit hex-digit hex-digit
                      ;
 
-function             = '{' function-params? statement* '}'
+function             = '{' function-signature? statement* '}'
                      ;
 
-function-params      = function-param ( ',' function-param )* ','? '->'
+function-signature   = function-param ( ',' function-param )* ','? return-type? '->'
+                     ;
+
+return-type          = '::' type
                      ;
 
 function-param       = identifier type-annotation?
