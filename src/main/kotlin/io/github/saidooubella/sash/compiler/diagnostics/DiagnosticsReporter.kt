@@ -35,13 +35,13 @@ public class DiagnosticsReporter(private val fileName: String) {
 
     public fun build(): List<Diagnostic> = reports.toList()
 
-    internal fun reportIllegalCharacter(start: Position, end: Position, text: String) {
-        report(start, end, "Invalid character `$text`")
+    internal fun reportIllegalCharacter(start: Position, end: Position, character: String) {
+        report(start, end, "Invalid character `$character`")
     }
 
     internal fun reportUnexpectedToken(start: Position, end: Position, expected: String, actual: String?) {
         val message = when (actual) {
-            null -> "Expected $expected"
+            null -> "Expected `$expected`"
             else -> "Expected `$expected` but got `$actual`"
         }
         report(start, end, message)
@@ -78,19 +78,15 @@ public class DiagnosticsReporter(private val fileName: String) {
     }
 
     internal fun reportAssignmentTypeMismatch(start: Position, end: Position, actual: Type, target: Type) {
-        report(
-            start,
-            end,
+        val message =
             "A value of type `${actual.stringify()}` cannot be assigned to a binding of type `${target.stringify()}`"
-        )
+        report(start, end, message)
     }
 
     internal fun reportArgumentTypeMismatch(start: Position, end: Position, actual: Type, target: Type) {
-        report(
-            start,
-            end,
+        val message =
             "A value of type `${actual.stringify()}` cannot be passed as an argument to a parameter of type `${target.stringify()}`"
-        )
+        report(start, end, message)
     }
 
     internal fun reportUnmatchedArgsCount(start: Position, end: Position, expected: Int, actual: Int) {
@@ -134,11 +130,9 @@ public class DiagnosticsReporter(private val fileName: String) {
     }
 
     internal fun reportInvalidReturnType(start: Position, end: Position, actual: Type, expected: Type) {
-        report(
-            start,
-            end,
+        val message =
             "Cannot return a value of type `${actual.stringify()}` by a function that returns `${expected.stringify()}`"
-        )
+        report(start, end, message)
     }
 
     internal fun reportCannotInferType(start: Position, end: Position, identifier: String) {

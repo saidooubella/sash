@@ -122,7 +122,7 @@ private fun enumEntry(context: ParserContext, input: MutableInput<Token>): EnumR
 private fun fieldsOrNull(input: MutableInput<Token>, context: ParserContext): RawFields? {
     val openBrace = input.consumeTokenOrNull(context, TokenType.OpenBrace) ?: return null
     val fields = buildDelimitedList {
-        if (input.current.type == TokenType.OpenBrace) return@buildDelimitedList input.current.run<Token, Unit> {
+        if (input.current.type == TokenType.OpenBrace) return@buildDelimitedList input.current.run {
             context.reporter.reportUnexpectedToken(start, end, "a field", null)
         }
         input.consumeWhile(context, { input.current.type != TokenType.CloseBrace }) {
