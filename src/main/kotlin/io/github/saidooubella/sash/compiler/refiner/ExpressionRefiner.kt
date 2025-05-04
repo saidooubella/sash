@@ -24,7 +24,11 @@ internal value class ExpressionMode private constructor(private val value: Int) 
     }
 }
 
-internal fun refineExpression(context: RefinerContext, expression: RawExpression, expressionMode: ExpressionMode): Expression {
+internal fun refineExpression(
+    context: RefinerContext,
+    expression: RawExpression,
+    expressionMode: ExpressionMode,
+): Expression {
     return when (expression) {
         is ParenthesizedRawExpression -> refineParenthesizedExpression(context, expression)
         is IdentifierRawExpression -> refineIdentifierExpression(context, expression, expressionMode)
@@ -48,7 +52,11 @@ private fun refineAccessExpression(context: RefinerContext, expression: AccessRa
     TODO("Not yet implemented")
 }
 
-private fun refineIfExpression(context: RefinerContext, expression: IfRawExpression, expressionMode: ExpressionMode): IfExpression {
+private fun refineIfExpression(
+    context: RefinerContext,
+    expression: IfRawExpression,
+    expressionMode: ExpressionMode,
+): IfExpression {
 
     if (!expressionMode[ExpressionMode.Statement] && expression.elseClause == null) {
         context.reporter.reportIfMissingElse(expression.ifKeyword.start, expression.ifKeyword.start)
@@ -94,8 +102,15 @@ private fun refineParenthesizedExpression(context: RefinerContext, expression: P
 
 private fun refineAssignmentExpression(context: RefinerContext, expression: AssignmentRawExpression): Expression {
 
-    val target = context.withContextualType(null) { refineExpression(context, expression.target, ExpressionMode.NotCallable) }
-    val value = context.withContextualType(target.type) { refineExpression(context, expression.value, ExpressionMode.NotCallable) }
+    val target =
+        context.withContextualType(null) { refineExpression(context, expression.target, ExpressionMode.NotCallable) }
+    val value = context.withContextualType(target.type) {
+        refineExpression(
+            context,
+            expression.value,
+            ExpressionMode.NotCallable
+        )
+    }
 
     if (target.type == ErrorType) return ErrorExpression(expression)
 
@@ -293,14 +308,18 @@ private fun refineFunctionExpression(context: RefinerContext, expression: Functi
         context, expression.openBrace, expression.params, functionType?.valueParams
     )
 
-    val fnScope = FunctionScope(functionType?.returnType)
+    var returnType = expression.params?.returnType?.type
+        ?.let { refineType(context, it) }
+        ?: functionType?.returnType
+
+    val fnScope = FunctionScope(returnType)
 
     val statements = context.scoped(fnScope) {
         params.fastForEach { param -> context.putDefinition(Definition(param.name, param.type, true)) }
         expression.statements.fastMap { refineStatement(context, it) }
     }
 
-    val returnType = fnScope.returnType ?: UnitType
+    returnType = fnScope.returnType ?: UnitType
 
     if (!checkReturnPaths(context, statements, returnType)) {
         context.reporter.reportRequiredReturnValue(expression.closeBrace.start, expression.closeBrace.end)
@@ -344,7 +363,12 @@ private fun refineFunctionParams(
         val annotationType = annotation?.let { refineType(context, it) }
 
         if (annotationType != null && contextualType != null && !contextualType.assignableTo(annotationType)) {
-            context.reporter.reportArgumentTypeMismatch(annotation.start, annotation.end, annotationType, contextualType)
+            context.reporter.reportArgumentTypeMismatch(
+                annotation.start,
+                annotation.end,
+                annotationType,
+                contextualType
+            )
         }
 
         val type = annotationType ?: contextualType
@@ -359,7 +383,11 @@ private fun refineFunctionParams(
     return parameters
 }
 
-private fun refineIdentifierExpression(context: RefinerContext, expression: IdentifierRawExpression, expressionMode: ExpressionMode): Expression {
+private fun refineIdentifierExpression(
+    context: RefinerContext,
+    expression: IdentifierRawExpression,
+    expressionMode: ExpressionMode,
+): Expression {
 
     if (expression.identifier.type == TokenType.Injected) return ErrorExpression(expression)
 
@@ -380,7 +408,9 @@ private fun refineIdentifierExpression(context: RefinerContext, expression: Iden
 
 private fun refineUnaryExpression(context: RefinerContext, expression: UnaryRawExpression): Expression {
 
-    val operand = context.withContextualType(null) { refineExpression(context, expression.operand, ExpressionMode.NotCallable) }
+    val operand = context.withContextualType(null) {
+        refineExpression(context, expression.operand, ExpressionMode.NotCallable)
+    }
 
     if (operand.type == ErrorType) return ErrorExpression(expression)
 
@@ -397,8 +427,12 @@ private fun refineUnaryExpression(context: RefinerContext, expression: UnaryRawE
 
 private fun refineLogicalBinaryExpression(context: RefinerContext, expression: LogicalBinaryRawExpression): Expression {
 
-    val left = context.withContextualType(null) { refineExpression(context, expression.left, ExpressionMode.NotCallable) }
-    val right = context.withContextualType(null) { refineExpression(context, expression.right, ExpressionMode.NotCallable) }
+    val left = context.withContextualType(null) {
+        refineExpression(context, expression.left, ExpressionMode.NotCallable)
+    }
+    val right = context.withContextualType(null) {
+        refineExpression(context, expression.right, ExpressionMode.NotCallable)
+    }
 
     if (right.type == ErrorType || left.type == ErrorType) return ErrorExpression(expression)
 
@@ -406,7 +440,13 @@ private fun refineLogicalBinaryExpression(context: RefinerContext, expression: L
     val logicalOperator = refineLogicalBinaryOperator(operator)
 
     val type = resolveLogicalBinaryOperationType(left.type, right.type) ?: run {
-        context.reporter.reportInvalidBinaryOperation(operator.start, operator.end, operator.text, left.type, right.type)
+        context.reporter.reportInvalidBinaryOperation(
+            operator.start,
+            operator.end,
+            operator.text,
+            left.type,
+            right.type
+        )
         return ErrorExpression(operator)
     }
 
@@ -415,8 +455,12 @@ private fun refineLogicalBinaryExpression(context: RefinerContext, expression: L
 
 private fun refineBinaryExpression(context: RefinerContext, expression: BinaryRawExpression): Expression {
 
-    val left = context.withContextualType(null) { refineExpression(context, expression.left, ExpressionMode.NotCallable) }
-    val right = context.withContextualType(null) { refineExpression(context, expression.right, ExpressionMode.NotCallable) }
+    val left = context.withContextualType(null) {
+        refineExpression(context, expression.left, ExpressionMode.NotCallable)
+    }
+    val right = context.withContextualType(null) {
+        refineExpression(context, expression.right, ExpressionMode.NotCallable)
+    }
 
     if (right.type == ErrorType || left.type == ErrorType) return ErrorExpression(expression)
 
@@ -424,7 +468,13 @@ private fun refineBinaryExpression(context: RefinerContext, expression: BinaryRa
     val binaryOperator = refineBinaryOperator(operator)
 
     val type = resolveBinaryOperationType(left.type, binaryOperator, right.type) ?: run {
-        context.reporter.reportInvalidBinaryOperation(operator.start, operator.end, operator.text, left.type, right.type)
+        context.reporter.reportInvalidBinaryOperation(
+            operator.start,
+            operator.end,
+            operator.text,
+            left.type,
+            right.type
+        )
         return ErrorExpression(operator)
     }
 
