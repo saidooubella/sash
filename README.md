@@ -1,4 +1,4 @@
-# S'ash - An Embeddable Language
+# S'ash — An Embeddable Language
 
 ⚠️ Warning: This language is still in its early development.
 
@@ -74,25 +74,32 @@ private suspend fun compile(source: String) = withContext(Dispatchers.IO) {
 }
 
 fun main() {
+
+    // Compile the snippet
     val (diagnostics, program) = compile("""println("Hello, world!");""")
-    Evaluator(program, builtInEnvironment())
+
+    // Check for errors
+    if (diagnostics.isEmpty()) {
+        Evaluator(program, builtInEnvironment())
+    } else {
+        diagnostics.forEach(::println)
+    }
 }
 ```
 
-For a complete example of using Sash, check out the (Sash Run
-[https://github.com/saidooubella/android-sash-run]
+For a complete example of using Sash, check out the [Sash Run](https://github.com/saidooubella/android-sash-run)
 
 ## Features
 
 -   **Embeddable**: Seamlessly integrates into applications, offering flexibility for various use cases.
 -   **Minimalistic Syntax**: Inspired by modern programming paradigms, prioritizing simplicity, readability, and developer productivity.
--   **Strong Type System**: Supports a statically-typed system that ensures type safety and reduces runtime errors.
+-   **Strong Type System**: Supports a statically typed system that ensures type safety and reduces runtime errors.
 
 ## Language Overview
 
 ### Hello world!
 
-Getting started with Sash is simple and intuitive. Here’s a basic example of printing "Hello, world!":
+Getting started with Sash is straightforward and intuitive. Here’s a basic example of printing "Hello, world!":
 
 ```Sash
 println("Hello, world!");
@@ -124,7 +131,7 @@ Multi-line comments start with `/*` and end with `*/`. They can span multiple li
 
 #### Nested Multi-Line Comments
 
-Multi-line comments can be nested within each other, allowing you to comment out sections of code that already contain multi-line comments. This is particularly useful when temporarily disabling large blocks of code.
+Multi-line comments can be nested within each other, allowing you to comment-out sections of code that already contain multi-line comments. This is particularly useful when temporarily disabling large blocks of code.
 
 ```Sash
 /*
@@ -193,7 +200,7 @@ In Sash, operations are performed on values of specific types, and certain opera
 
 ### Control Flow
 
-statements allow you to dictate the flow of execution in your Sash program. Below are the primary control flow structures.
+Statements allow you to dictate the flow of execution in your Sash program. Below are the primary control flow structures.
 
 #### **If-Else**
 
@@ -310,7 +317,7 @@ println(someone);
 Functions can also be defined with the same `def` keyword, allowing for functional programming constructs to be used in a clear and readable manner.
 
 ```Sash
-def add = { lhs: Int, rhs: Int ->
+def add = { lhs: Int, rhs: Int :: Int ->
     return lhs + rhs;
 };
 
@@ -409,7 +416,7 @@ By leveraging generic definitions, Sash enables expressive and reusable abstract
 
 ##### Restriction
 
-**Generics can only be used with functions and type definitions** – You cannot use generics with mutable definitions.
+**Generics can only be used with immutable functions and type definitions** – You cannot use generics with mutable definitions.
 
 #### Mutable Definitions
 
@@ -424,7 +431,7 @@ println(counter); // 1
 
 ##### Immutability by Default
 
-Sash enforces immutability unless explicitly stated with `def mut`, promoting safer and more predictable code. This helps prevent unintended modifications and makes it easier to reason about program state.
+Sash enforces immutability unless explicitly stated with `def mut`, promoting safer and more predictable code. This helps prevent unintended modifications and makes it easier to reason about the program state.
 
 ##### Restriction
 
@@ -443,9 +450,8 @@ This tells the compiler to evaluate the expression but ignore its result.
 
 **Important Notes**:
 
-- Expressions must have a non-`Unit` type when discarded;
-- Discarding a `Unit` expression results in a compile-time error.
-- Having an expression with a non-`Unit` type without discarding it is also a compile-time error.
+- Leaving a non-Unit expression unused without discarding it causes a compile-time error.
+- Trying to discard a Unit expression also results in a compile-time error.
 
 ## Grammar
 
@@ -653,7 +659,19 @@ string-part          = ~( '"' | '\r\n' | '\r' | '\n' )
 ```
 
 ```
-function             = '{' function-params? statement* '}'
+function             = '{' function-signature? statement* '}'
+                     ;
+
+```
+
+```
+function-signature   = function-param ( ',' function-param )* ','? return-type? '->'
+                     ;
+
+```
+
+```
+return-type          = '::' type
                      ;
 ```
 
