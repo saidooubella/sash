@@ -84,10 +84,7 @@ internal fun resolveUnaryOperationType(operator: UnaryOperator, operand: Type): 
 }
 
 internal fun resolveLogicalBinaryOperationType(left: Type, right: Type): Type? {
-    return when (matchType(left, right, BooleanType)) {
-        true -> BooleanType
-        else -> null
-    }
+    return if (matchType(left, right, BooleanType)) BooleanType else null
 }
 
 private fun matchType(left: Type, right: Type, actual: Type): Boolean = left == actual && right == actual

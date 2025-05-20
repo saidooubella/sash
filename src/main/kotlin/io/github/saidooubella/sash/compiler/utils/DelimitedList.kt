@@ -8,8 +8,8 @@ public abstract class DelimitedList<out E : Any, out D : Any> internal construct
 
 private object EmptyDelimitedList : DelimitedList<Nothing, Nothing>() {
     override val fullSize: Int = 0
-    override fun getDelimiter(index: Int): Nothing = throw IndexOutOfBoundsException()
-    override fun getElement(index: Int): Nothing = throw IndexOutOfBoundsException()
+    override fun getDelimiter(index: Int): Nothing = throw IndexOutOfBoundsException(index)
+    override fun getElement(index: Int): Nothing = throw IndexOutOfBoundsException(index)
 }
 
 internal fun <E : Any, D : Any> emptyDelimitedList(): DelimitedList<E, D> = EmptyDelimitedList
@@ -19,7 +19,7 @@ internal fun <E : Any, D : Any> DelimitedList<E, D>?.orEmpty(): DelimitedList<E,
 }
 
 internal inline val <E : Any, D : Any> DelimitedList<E, D>.elementsSize: Int
-    get() = (fullSize + 1) / 2
+    get() = (fullSize + 1) shr 1
 
 internal inline fun <T : Any> DelimitedList<T, *>.forEach(consumer: (T) -> Unit) {
     for (index in 0..<elementsSize) consumer(getElement(index))

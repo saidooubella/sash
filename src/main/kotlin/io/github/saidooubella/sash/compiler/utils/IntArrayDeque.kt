@@ -5,7 +5,7 @@ internal class IntArrayDeque {
     private var elementData: IntArray = emptyElementData
     private var head: Int = 0
 
-    var size: Int = 0
+    internal var size: Int = 0
         private set
 
     private fun ensureCapacity(minCapacity: Int) {
@@ -38,18 +38,18 @@ internal class IntArrayDeque {
 
     private fun isEmpty(): Boolean = size == 0
 
-    fun last(): Int {
+    internal fun last(): Int {
         if (isEmpty()) throw NoSuchElementException("ArrayDeque is empty.")
         return elementData[internalIndex(size - 1)]
     }
 
-    fun addLast(element: Int) {
+    internal fun addLast(element: Int) {
         ensureCapacity(size + 1)
         elementData[internalIndex(size)] = element
         size += 1
     }
 
-    inline fun removeFirstOrElse(default: () -> Int): Int {
+    internal inline fun removeFirstOrElse(default: () -> Int): Int {
         if (isEmpty()) return default()
         val element = elementData[head]
         head = incremented(head)
@@ -57,7 +57,7 @@ internal class IntArrayDeque {
         return element
     }
 
-    operator fun get(index: Int): Int {
+    internal operator fun get(index: Int): Int {
         checkElementIndex(index, size)
         return elementData[internalIndex(index)]
     }

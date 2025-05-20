@@ -10,7 +10,7 @@ import io.github.saidooubella.sash.evaluator.evalStatement
 
 internal typealias AnyValue = Value<*>
 
-public abstract class Value<Self : Value<Self>> : Typed {
+public abstract class Value<in Self : Value<Self>> : Typed {
 
     internal abstract fun eq(that: Self): BooleanValue
     internal abstract fun stringify(): StringValue

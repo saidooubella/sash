@@ -91,10 +91,10 @@ private fun multiplicative(context: ParserContext, input: MutableInput<Token>, b
 
 private fun prefix(context: ParserContext, input: MutableInput<Token>, basic: Boolean): RawExpression {
     return when (input.current.type) {
-        TokenType.Bang, TokenType.Plus, TokenType.Minus -> UnaryRawExpression(
-            input.consume(),
-            prefix(context, input, basic)
-        )
+        TokenType.Bang, TokenType.Plus, TokenType.Minus -> {
+            val operator = input.consume()
+            UnaryRawExpression(operator, prefix(context, input, basic))
+        }
 
         else -> postfix(context, input, basic)
     }
