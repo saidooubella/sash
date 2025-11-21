@@ -3,11 +3,11 @@ package io.github.saidooubella.sash.compiler.tokens
 import io.github.saidooubella.sash.compiler.input.MutableInput
 import io.github.saidooubella.sash.compiler.input.consume
 import io.github.saidooubella.sash.compiler.input.isNotDone
-import io.github.saidooubella.sash.compiler.input.provider.InputProvider
+import io.github.saidooubella.sash.compiler.input.source.InputSource
 
-public class TokensProvider(
+public class TokensSource(
     private val input: MutableInput<RawToken>,
-) : InputProvider<Token> {
+) : InputSource<Token> {
 
     override fun isDone(item: Token): Boolean = item.type == TokenType.EndOfFile
 

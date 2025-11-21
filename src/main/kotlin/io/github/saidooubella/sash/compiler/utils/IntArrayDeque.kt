@@ -78,7 +78,5 @@ private fun newCapacity(oldCapacity: Int, minCapacity: Int): Int {
 }
 
 private fun checkElementIndex(index: Int, size: Int) {
-    if (index < 0 || index >= size) {
-        throw IndexOutOfBoundsException("index: $index, size: $size")
-    }
+    if (index !in 0..<size) throw IndexOutOfBoundsException("index: $index, size: $size")
 }

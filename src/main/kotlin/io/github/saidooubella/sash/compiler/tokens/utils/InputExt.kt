@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.github.saidooubella.sash.compiler.tokens.utils
 
 import io.github.saidooubella.sash.compiler.input.IntInput
@@ -9,7 +11,7 @@ import io.github.saidooubella.sash.compiler.tokens.RawTokenType
 import io.github.saidooubella.sash.compiler.tokens.TokenizerContext
 import io.github.saidooubella.sash.compiler.utils.forEachCodepoint
 
-internal fun IntInput.matches(char: Char): Boolean {
+internal inline fun IntInput.matches(char: Char): Boolean {
     return current == char.code
 }
 
@@ -20,19 +22,19 @@ internal fun IntInput.matches(text: String): Boolean {
     return true
 }
 
-internal fun IntInput.matchesWhitespace(): Boolean {
+internal inline fun IntInput.matchesWhitespace(): Boolean {
     return Character.isWhitespace(current) && notMatchesNewLine()
 }
 
-internal fun IntInput.matchesNewLine(): Boolean {
+internal inline fun IntInput.matchesNewLine(): Boolean {
     return matches('\r') && matches('\n') || matches('\r') || matches('\n')
 }
 
-internal fun IntInput.notMatchesNewLine(): Boolean {
+internal inline fun IntInput.notMatchesNewLine(): Boolean {
     return !matchesNewLine()
 }
 
-internal fun MutableIntInput.collect(dest: StringBuilder, count: Int) {
+internal inline fun MutableIntInput.collect(dest: StringBuilder, count: Int) {
     repeat(count) { dest.appendCodePoint(consume()) }
 }
 
@@ -45,7 +47,7 @@ internal inline fun MutableIntInput.collectWhile(
     }
 }
 
-internal fun MutableIntInput.consumeCharToken(
+internal inline fun MutableIntInput.consumeCharToken(
     context: TokenizerContext,
     type: RawTokenType,
 ): RawToken {

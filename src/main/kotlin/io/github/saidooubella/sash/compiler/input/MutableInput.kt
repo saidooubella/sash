@@ -1,10 +1,10 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.github.saidooubella.sash.compiler.input
 
-import io.github.saidooubella.sash.compiler.input.provider.InputProvider
+import io.github.saidooubella.sash.compiler.input.source.InputSource
 
-public fun <T> MutableInput(provider: InputProvider<T>): MutableInput<T> {
-    return MutableInputImpl(provider)
-}
+public fun <T> MutableInput(provider: InputSource<T>): MutableInput<T> = MutableInputImpl(provider)
 
 public abstract class MutableInput<T> internal constructor() : Input<T>() {
     internal abstract fun advance()
@@ -13,9 +13,9 @@ public abstract class MutableInput<T> internal constructor() : Input<T>() {
     internal abstract fun done()
 }
 
-internal fun <T> MutableInput<T>.consume(): T = current.also { advance() }
+internal inline fun <T> MutableInput<T>.consume(): T = current.also { advance() }
 
-private class MutableInputImpl<T>(private val provider: InputProvider<T>) : MutableInput<T>() {
+private class MutableInputImpl<T>(private val provider: InputSource<T>) : MutableInput<T>() {
 
     private val backtrack = ArrayDeque<ArrayDeque<T>>()
     private val cache = ArrayDeque<T>()

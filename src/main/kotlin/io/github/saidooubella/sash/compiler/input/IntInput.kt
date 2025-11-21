@@ -7,5 +7,5 @@ public abstract class IntInput internal constructor() : AutoCloseable {
 }
 
 @PublishedApi
-internal val IntInput.isNotDone: Boolean
+internal inline val IntInput.isNotDone: Boolean
     get() = !isDone

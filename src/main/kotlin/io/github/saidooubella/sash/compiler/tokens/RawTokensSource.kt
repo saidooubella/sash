@@ -1,7 +1,7 @@
 package io.github.saidooubella.sash.compiler.tokens
 
 import io.github.saidooubella.sash.compiler.input.MutableIntInput
-import io.github.saidooubella.sash.compiler.input.provider.InputProvider
+import io.github.saidooubella.sash.compiler.input.source.InputSource
 import io.github.saidooubella.sash.compiler.tokens.cases.normal.*
 import io.github.saidooubella.sash.compiler.tokens.cases.string.StringLiteralCase
 import io.github.saidooubella.sash.compiler.tokens.cases.string.StringUnquoteCase
@@ -26,10 +26,10 @@ private val stringModeCases = buildList {
     add(StringLiteralCase)
 }
 
-public class RawTokensProvider(
+public class RawTokensSource(
     private val input: MutableIntInput,
     private val context: TokenizerContext,
-) : InputProvider<RawToken> {
+) : InputSource<RawToken> {
 
     override fun next(): RawToken {
         while (true) {

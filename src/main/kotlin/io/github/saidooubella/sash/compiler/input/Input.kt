@@ -6,5 +6,5 @@ public abstract class Input<T> internal constructor() : AutoCloseable {
 	internal abstract fun peek(offset: Int): T
 }
 
-internal val <T> Input<T>.isNotDone: Boolean
+internal inline val <T> Input<T>.isNotDone: Boolean
 	get() = !isDone

@@ -1,25 +1,23 @@
 package io.github.saidooubella.sash.compiler.input
 
-import io.github.saidooubella.sash.compiler.input.provider.IntInputProvider
+import io.github.saidooubella.sash.compiler.input.source.IntInputSource
 import io.github.saidooubella.sash.compiler.utils.IntArrayDeque
 
-public fun MutableIntInput(provider: IntInputProvider): MutableIntInput = MutableIntInputImpl(provider)
+public fun MutableIntInput(provider: IntInputSource): MutableIntInput = MutableIntInputImpl(provider)
 
 public abstract class MutableIntInput @PublishedApi internal constructor() : IntInput() {
     internal abstract fun advance()
 }
 
 @PublishedApi
-internal fun MutableIntInput.consume(): Int {
-    return current.also { advance() }
-}
+internal fun MutableIntInput.consume(): Int = current.also { advance() }
 
 internal fun MutableIntInput.advanceBy(count: Int) {
     repeat(count) { advance() }
 }
 
 private class MutableIntInputImpl(
-    private val provider: IntInputProvider,
+    private val provider: IntInputSource,
 ) : MutableIntInput() {
 
     private val cache = IntArrayDeque()

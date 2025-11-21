@@ -1,4 +1,4 @@
-package io.github.saidooubella.sash.compiler.input.provider
+package io.github.saidooubella.sash.compiler.input.source
 
 import io.github.saidooubella.sash.compiler.utils.isHighSurrogate
 import io.github.saidooubella.sash.compiler.utils.isLowSurrogate
@@ -6,7 +6,7 @@ import io.github.saidooubella.sash.compiler.utils.toCodePoint
 
 private const val EOF = -1
 
-public class StringProvider(private val source: String) : IntInputProvider {
+public class StringSource(private val source: String) : IntInputSource {
 
     private var index: Int = 0
 
